@@ -7,9 +7,7 @@ from PIL import Image
 import numpy as np
 import dlib
 import sys
-import cv2
-from sklearn.cluster import KMeans
-from lib.vaf_util import get_crops_landmarks, extract_features_eyes, extract_features_mouth
+from lib.vaf_util import get_crops_landmarks
 
 class VideoDataset(Dataset):
     def __init__(self, frame_direc, face_detector_path, transform=None):
@@ -27,54 +25,42 @@ class VideoDataset(Dataset):
         return face_detector, sp68
 
     def __len__(self):
-        return len(self.rgb_frames)
+        return len(self.frames)
 
     def __getitem__(self, idx):
-        # Load RGB frame
-        rgb_frame_path = os.path.join(self.rgb_dir, self.rgb_frames[idx])
-        rgb_frame = Image.open(rgb_frame_path).convert('RGB')
-        rgb_frame_np = np.array(rgb_frame)
-        
-        # Perform face detection and extract features
-        face_crops, landmarks = get_crops_landmarks(self.face_detector, self.sp68, rgb_frame_np)
-        
-        if len(landmarks) == 0:
-            print(f"No face detected in {rgb_frame_path}. Skipping this set!!")
-            return None  # Skip frames with no detected face
-        
-        face_crop = face_crops[0]
-        landmarks = landmarks[0]
-        
-        # Extract eyes and mouth features
-        features_eyes = extract_features_eyes(landmarks, face_crop)
-        features_mouth = extract_features_mouth(landmarks, face_crop)
-        
-        if features_eyes is None or features_mouth is None:
-            print(f"Feature extraction failed for {rgb_frame_path}. Skipping frame.")
-            return None
+        # Load frame
+        num_frames = 12 # FOR NOW
+        cropped_frames = []
 
-        spatial_features = np.concatenate((features_eyes, features_mouth))
-        spatial_features = torch.tensor(spatial_features, dtype=torch.float32)
+        for i in range(num_frames):
+            frame_path = os.path.join(self.frame_direc, self.frames[idx + i])  # Adjust index for multiple frames
+            frame = Image.open(frame_path) #.convert('RGB')
+            frame = frame.convert('RGB') 
+            frame_np = np.array(frame)
 
-        # Load and stack optical flow frames, ensuring idx + 10 does not exceed limits
-        flow_stack = []
-        for i in range(idx, min(idx + 10, len(self.flow_frames))):
-            flow_path = os.path.join(self.flow_dir, self.flow_frames[i])
-            flow_frame = Image.open(flow_path).convert('L')
-            flow_stack.append(np.array(flow_frame))
+            # Debugging checks
+            print(f"Frame shape: {frame_np.shape}")  # Should be (height, width, 3)
+            print(f"Frame dtype: {frame_np.dtype}")  # Should be uint8
+            print(f"Pixel value range: {frame_np.min()} to {frame_np.max()}")  # Should be 0 to 255
+            
+            # Perform face detection and extract features for each frame
+            print(f"Frame shape: {frame_np.shape} direc: {frame_path} and len till now: {len(cropped_frames)}")  # Should be (height, width, 3) for RGB
+            face_crops, landmarks = get_crops_landmarks(self.face_detector, self.sp68, frame_np)
 
-        flow_stack = np.stack(flow_stack, axis=0)
-        flow_stack = torch.tensor(flow_stack, dtype=torch.float32).unsqueeze(0)
+            if len(face_crops) == 0:
+                print(f"No face detected in {frame_path}. Skipping this frame.")
+                return None  # Skip frames with no detected face
 
-        if self.transform:
-            rgb_frame = self.transform(rgb_frame)
+            cropped_frames.append(face_crops[0])  # Append the first crop if found
 
-        return spatial_features, flow_stack
+        return torch.stack(cropped_frames)  # Return stacked frames as a tensor
+    
 
-def get_data_loaders(rgb_dir, flow_dir, face_detector_path, batch_size=8):
+def get_data_loaders(frame_direc, face_detector_path, batch_size=1):  # Batch size is set to 1 for now but needs to be changes along with how get_load_loaders is passing data to its caller.
     transform = transforms.Compose([
         transforms.Resize((128, 128)),
         transforms.ToTensor(),
     ])
-    dataset = VideoDataset(rgb_dir, flow_dir, face_detector_path, transform)
+    dataset = VideoDataset(frame_direc, face_detector_path, transform) # CROPPED DATA
+    # return dataset
     return DataLoader(dataset, batch_size=batch_size, shuffle=True)
