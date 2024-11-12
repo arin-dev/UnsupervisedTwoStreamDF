@@ -1,7 +1,6 @@
 torch
 torchvision
 numpy
-opencv-python
 dlib
 tqdm
 scikit-learn
@@ -11,5 +10,6 @@ scikit-image
 facenet-pytorch
 Pillow
 tensorboard-logger
-python-cuda
 opencv-python-headless
+# python-cuda
+# opencv-python

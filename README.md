@@ -1,1 +1,3 @@
-# UnsupervisedTwoStreamDF
+# Unsupervised Two-Stream Architecture for Deepfake Detection
+
+This architecture utilizes two streams: one for spatial features, which captures the static content of each frame, and the other for temporal dynamics, which analyzes the motion and changes between frames. This dual approach enhances the model's ability to detect deepfake videos by leveraging both visual and motion cues, improving accuracy and robustness in identifying manipulated content.
