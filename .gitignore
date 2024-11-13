@@ -162,10 +162,11 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# SPECIFIC FILE EXTENSIONS
+# SPECIFIC FILES
 *.dat
 *.whl
-# prepare_data1.py
+*.zip
+testing_functions.py
 
 # IGNORING TEST/HELPER CODES TO SAVE UNNECESSARY PUSHES
 # All directories

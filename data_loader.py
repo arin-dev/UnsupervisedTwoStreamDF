@@ -3,10 +3,9 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 import os
-from PIL import Image
-import numpy as np
 import dlib
 import sys
+import cv2
 from lib.vaf_util import get_crops_landmarks
 
 class VideoDataset(Dataset):
@@ -28,39 +27,26 @@ class VideoDataset(Dataset):
         return len(self.frames)
 
     def __getitem__(self, idx):
-        # Load frame
-        num_frames = 12 # FOR NOW
-        cropped_frames = []
+        frame_path = os.path.join(self.frame_direc, self.frames[idx])
+        img = cv2.imread(frame_path)
+        if img is None:
+            print(f"Could not open image file: {frame_path}")
+            return None
+        
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        face_crops, _ = get_crops_landmarks(self.face_detector, self.sp68, img)
 
-        for i in range(num_frames):
-            frame_path = os.path.join(self.frame_direc, self.frames[idx + i])  # Adjust index for multiple frames
-            frame = Image.open(frame_path) #.convert('RGB')
-            frame = frame.convert('RGB') 
-            frame_np = np.array(frame)
+        if len(face_crops) == 0:
+            print(f"No face detected in {frame_path}. Skipping this frame.")
+            return None
 
-            # Debugging checks
-            print(f"Frame shape: {frame_np.shape}")  # Should be (height, width, 3)
-            print(f"Frame dtype: {frame_np.dtype}")  # Should be uint8
-            print(f"Pixel value range: {frame_np.min()} to {frame_np.max()}")  # Should be 0 to 255
-            
-            # Perform face detection and extract features for each frame
-            print(f"Frame shape: {frame_np.shape} direc: {frame_path} and len till now: {len(cropped_frames)}")  # Should be (height, width, 3) for RGB
-            face_crops, landmarks = get_crops_landmarks(self.face_detector, self.sp68, frame_np)
-
-            if len(face_crops) == 0:
-                print(f"No face detected in {frame_path}. Skipping this frame.")
-                return None  # Skip frames with no detected face
-
-            cropped_frames.append(face_crops[0])  # Append the first crop if found
-
-        return torch.stack(cropped_frames)  # Return stacked frames as a tensor
+        return face_crops[0]  # Return the first crop directly
     
 
-def get_data_loaders(frame_direc, face_detector_path, batch_size=1):  # Batch size is set to 1 for now but needs to be changes along with how get_load_loaders is passing data to its caller.
+def get_data_loaders(frame_direc, face_detector_path, batch_size=1):
     transform = transforms.Compose([
         transforms.Resize((128, 128)),
         transforms.ToTensor(),
     ])
-    dataset = VideoDataset(frame_direc, face_detector_path, transform) # CROPPED DATA
-    # return dataset
+    dataset = VideoDataset(frame_direc, face_detector_path, transform)
     return DataLoader(dataset, batch_size=batch_size, shuffle=True)

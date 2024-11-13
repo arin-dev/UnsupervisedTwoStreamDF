@@ -10,6 +10,6 @@ scikit-image
 facenet-pytorch
 Pillow
 tensorboard-logger
-opencv-python-headless
+opencv-python
+# opencv-python-headless
 # python-cuda
-# opencv-python
