@@ -167,6 +167,7 @@ cython_debug/
 *.whl
 *.zip
 testing_functions.py
+*.pth
 
 # IGNORING TEST/HELPER CODES TO SAVE UNNECESSARY PUSHES
 # All directories

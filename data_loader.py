@@ -1,4 +1,3 @@
-# data_loader.py
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
@@ -29,6 +28,9 @@ class VideoDataset(Dataset):
 
     def __getitem__(self, idx):
         frame_path = os.path.join(self.frame_direc, self.frames[idx])
+        if not frame_path.endswith('.jpg'):
+            print(f"Folder seems invalid : {frame_path}! Skipping to next.")
+            return None
         img = cv2.imread(frame_path)
         if img is None:
             print(f"Could not open image file: {frame_path}")
@@ -42,6 +44,7 @@ class VideoDataset(Dataset):
             return None
 
         if self.transform:
+<<<<<<< HEAD
             cv2.imwrite(f'modified_image_{idx}.jpg', face_crops[0])
             img = Image.fromarray(face_crops[0])
             face_crops[0] = self.transform(img)
@@ -49,6 +52,12 @@ class VideoDataset(Dataset):
         print(idx)
         return face_crops[0]  # Return the first crop directly
     
+=======
+            img = Image.fromarray(face_crops[0])
+            face_crops[0] = self.transform(img)
+        
+        return face_crops[0]
+>>>>>>> 122742a (Working Supervised Model (for batch_size = 1))
 
 def get_data_loaders(frame_direc, face_detector_path, batch_size=1):
     transform = transforms.Compose([
