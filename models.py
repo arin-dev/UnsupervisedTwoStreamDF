@@ -44,20 +44,8 @@ class TwoStreamNetworkTransferLearning(nn.Module):
 
     def forward(self, frames):
         spatial_predictions = []
-<<<<<<< HEAD
-
-        print(f"{len(frames)} and {frames[0].shape} ")
-
-        # for i in range(frames.size(0)):  # Loop through 12 frames
-        for frame in frames:  # Loop through 12 frames
-            # spatial_output = self.spatial_stream(frames[:, i, :, :, :])  # Shape: (batch_size, 128) 
-            # (batch_size, num_frames, channels (rgb), height, width)
-            spatial_output = self.spatial_stream(frame)  # Shape: (batch_size, 128) 
-            # (batch_size, num_frames, height, width)
-=======
         for frame in frames:
             spatial_output = self.spatial_stream(frame.unsqueeze(0)) # Add batch dimension
->>>>>>> 122742a (Working Supervised Model (for batch_size = 1))
             spatial_predictions.append(spatial_output)
         
         spatial_features = torch.mean(torch.stack(spatial_predictions), dim=0)

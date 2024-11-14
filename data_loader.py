@@ -44,20 +44,10 @@ class VideoDataset(Dataset):
             return None
 
         if self.transform:
-<<<<<<< HEAD
-            cv2.imwrite(f'modified_image_{idx}.jpg', face_crops[0])
-            img = Image.fromarray(face_crops[0])
-            face_crops[0] = self.transform(img)
-        
-        print(idx)
-        return face_crops[0]  # Return the first crop directly
-    
-=======
             img = Image.fromarray(face_crops[0])
             face_crops[0] = self.transform(img)
         
         return face_crops[0]
->>>>>>> 122742a (Working Supervised Model (for batch_size = 1))
 
 def get_data_loaders(frame_direc, face_detector_path, batch_size=1):
     transform = transforms.Compose([
