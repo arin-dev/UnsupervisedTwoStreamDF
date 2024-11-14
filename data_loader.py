@@ -7,6 +7,7 @@ import dlib
 import sys
 import cv2
 from lib.vaf_util import get_crops_landmarks
+from PIL import Image
 
 class VideoDataset(Dataset):
     def __init__(self, frame_direc, face_detector_path, transform=None):
@@ -40,6 +41,12 @@ class VideoDataset(Dataset):
             print(f"No face detected in {frame_path}. Skipping this frame.")
             return None
 
+        if self.transform:
+            cv2.imwrite(f'modified_image_{idx}.jpg', face_crops[0])
+            img = Image.fromarray(face_crops[0])
+            face_crops[0] = self.transform(img)
+        
+        print(idx)
         return face_crops[0]  # Return the first crop directly
     
 

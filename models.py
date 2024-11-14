@@ -102,9 +102,15 @@ class TwoStreamNetworkTransferLearning(nn.Module):
     def forward(self, frames):
         # Process each frame individually for spatial stream
         spatial_predictions = []
-        for i in range(frames.size(1)):  # Loop through 12 frames
-            spatial_output = self.spatial_stream(frames[:, i, :, :, :])  # Shape: (batch_size, 128) 
+
+        print(f"{len(frames)} and {frames[0].shape} ")
+
+        # for i in range(frames.size(0)):  # Loop through 12 frames
+        for frame in frames:  # Loop through 12 frames
+            # spatial_output = self.spatial_stream(frames[:, i, :, :, :])  # Shape: (batch_size, 128) 
             # (batch_size, num_frames, channels (rgb), height, width)
+            spatial_output = self.spatial_stream(frame)  # Shape: (batch_size, 128) 
+            # (batch_size, num_frames, height, width)
             spatial_predictions.append(spatial_output)
         
         # Average spatial predictions

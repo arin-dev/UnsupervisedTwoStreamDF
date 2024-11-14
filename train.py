@@ -28,7 +28,9 @@ def train_model(num_epochs, frame_direc, face_detector_path, device):
                 continue  # Skip non-video folders
             
             train_loader = get_data_loaders(os.path.join(frame_direc, video_folder), face_detector_path)
-
+            # data = train_loader
+            data_to_model = []
+            i = 0
             for data in train_loader: # Right now passing only one dataset to train_loader so this is not necessary;
                 if data is None:
                     continue  # Skip if data is None
@@ -38,15 +40,25 @@ def train_model(num_epochs, frame_direc, face_detector_path, device):
                     print(f"Label for {video_name} not found! Skipping to next.")
                     continue
                 
-                data = data.to(device)
+                # data = data.to(device)
+                i = i + 1
+                print(f"CURRENTLY {i}th time IN TRAIN: {data.shape}")
+                data_to_model.append(data)
 
-                optimizer.zero_grad()
-                outputs = model(data)
+            optimizer.zero_grad()
+            data_to_model = torch.stack(data_to_model, dim=0)
+            data_to_model = data_to_model.to(device)
 
-                labels = torch.tensor(labels).to(device)
-                loss = criterion(outputs, labels)
-                loss.backward()
-                optimizer.step()
+            outputs = model(data_to_model)
+
+            labels = torch.tensor(labels).to(device)
+            loss = criterion(outputs, labels)
+            # loss.backward()
+            # optimizer.step()
+            # labels = torch.tensor(labels).to(device)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
         
         print(f'Epoch {epoch+1}/{num_epochs}, Loss: {loss.item()}')
     torch.save(model.state_dict(), 'two_stream_model.pth')
