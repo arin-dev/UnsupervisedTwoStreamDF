@@ -25,7 +25,7 @@ def train_model(num_epochs, frame_direc, face_detector_path, device):
                 print(f"Folder seems invalid : {video_name}! Skipping to next.")
                 continue
             
-            train_loader = get_data_loaders(os.path.join(frame_direc, video_folder), face_detector_path, batch_size=12)
+            train_loader = get_data_loaders(os.path.join(frame_direc, video_folder), face_detector_path, batch_size=1)
             data_to_model = []
             i = 0
             for data in train_loader:

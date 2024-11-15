@@ -22,7 +22,7 @@ def test_model(frame_direc, face_detector_path, device):
             if not video_name.endswith('.mp4'):
                 continue
             
-            test_loader = get_data_loaders(os.path.join(frame_direc, video_folder), face_detector_path, batch_size=12)
+            test_loader = get_data_loaders(os.path.join(frame_direc, video_folder), face_detector_path, batch_size=1)
             data_to_model = []
             for data in test_loader:
                 if data is None:
@@ -30,12 +30,14 @@ def test_model(frame_direc, face_detector_path, device):
                 data_to_model.append(data)
 
             data_to_model = torch.stack(data_to_model, dim=0).to(device)
-            outputs = model(data_to_model)
-            predicted = (outputs > 0.5).float()
-            labels = torch.tensor([label_map[video_name]]).float().to(device).unsqueeze(1)
 
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
+            for batch in data_to_model:
+                outputs = model(batch)
+                predicted = (outputs > 0.85).float() # change predicted condition as you increase epoch size
+                labels = torch.tensor([label_map[video_name]]).float().to(device).unsqueeze(1)
+
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
 
     accuracy = correct / total * 100
     print(f'Accuracy: {accuracy:.2f}%')
