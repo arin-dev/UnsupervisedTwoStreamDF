@@ -28,7 +28,7 @@ class VideoDataset(Dataset):
 
     def __getitem__(self, idx):
         batch_images = []
-        video_names = []
+        # video_names = []
 
         # Get the path of the subfolder
         subfolder_path = os.path.join(self.frame_direc, self.subfolders[idx])

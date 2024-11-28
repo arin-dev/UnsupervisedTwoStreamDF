@@ -10,7 +10,7 @@ def train_model(num_epochs, frame_direc, face_detector_path, device, batch_size=
     print("Entering to train data!")
     model = TwoStreamNetworkTransferLearning().to(device)
     criterion = nn.BCELoss()
-    optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.001)
+    optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.0001)
 
     print("Opening Label.json!")
     with open('labels.json', 'r') as file:
@@ -71,7 +71,8 @@ def train_model(num_epochs, frame_direc, face_detector_path, device, batch_size=
             loss.backward()
             optimizer.step()
 
-            print(f'Batch {batch_count+1}/{len(train_loader)}, Loss: {loss.item()}')
+            print(f'Batch {batch_count+1}/{len(train_loader)} // {epoch+1}/{num_epochs}, Loss: {loss.item()}')
+            batch_count+=1
         print(f'Epoch {epoch+1}/{num_epochs}, Loss: {loss.item()}')
         
     torch.save(model.state_dict(), 'two_stream_model.pth')

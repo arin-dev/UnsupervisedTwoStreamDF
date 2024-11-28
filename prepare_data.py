@@ -3,10 +3,7 @@ import cv2
 import random
 import sys
 
-def extract_frames_from_videos(video_folder, output_folder):
-    
-    print("WORKING ! ")
-
+def extract_frames_from_videos(video_folder, output_folder, no_of_sameples):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
@@ -29,7 +26,7 @@ def extract_frames_from_videos(video_folder, output_folder):
             available_starts = range(max(0, frame_count - 13))
 
             # Randomly select 4 starting points for the sets of 12 frames
-            selected_starts = random.sample(available_starts, min(4, len(available_starts)))
+            selected_starts = random.sample(available_starts, min(no_of_sameples, len(available_starts)))
 
             for start in selected_starts:
                 cap.set(cv2.CAP_PROP_POS_FRAMES, start)
@@ -43,7 +40,7 @@ def extract_frames_from_videos(video_folder, output_folder):
                     output_video_folder = os.path.join(output_folder, f"{os.path.basename(video_name)}_{start}")
                     os.makedirs(output_video_folder, exist_ok=True)
                     for k, frame in enumerate(frames):
-                        cv2.imwrite(os.path.join(output_video_folder, f"frame_{k}.jpg"), frame)
+                        cv2.imwrite(os.path.join(output_video_folder, f"frame_{k:02d}.jpg"), frame)
             cap.release()
 
 if __name__ == "__main__":
@@ -52,8 +49,12 @@ if __name__ == "__main__":
         sys.exit(1)
     video_folder = sys.argv[1]
     output_folder = sys.argv[2]
-    extract_frames_from_videos(video_folder, output_folder)
+    no_of_sameples = 1
+    print("Starting!")
+    extract_frames_from_videos(video_folder, output_folder, no_of_sameples)
+    print("Finished!")
 
 # To use this script from the terminal, run:
 # python prepare_data.py <video_folder> <output_folder>
-# python prepare_data.py ./function_test_data/ ./frames_function_test_data/
+# python prepare_data.py ./function_test_data/ ./frames_function_test_data/test/
+# python prepare_data.py ./function_test_data/ ./frames_function_cross_test_data/
