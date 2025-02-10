@@ -22,7 +22,7 @@ def compute_spearman_correlation(features):
         correlations.append(rho)
     return correlations
 
-def classify_video(correlations, threshold=0.7):
+def classify_video(correlations, threshold=0.95):
     """Classify the video based on average correlation."""
     avg_correlation = np.mean(correlations)
     classification = "Real" if avg_correlation > threshold else "Deepfake"
@@ -56,4 +56,5 @@ def main(directory):
 # video_frames_directory = "path_to_directory_with_frames"  # Replace with your frames directory
 # video_frames_directory = "./frames_function_cross_test_data"  # Replace with your frames directory
 video_frames_directory = "./cropped_frames"  # Replace with your frames directory
+# video_frames_directory = "./cropped_output_frames"  # Replace with your frames directory
 main(video_frames_directory)
