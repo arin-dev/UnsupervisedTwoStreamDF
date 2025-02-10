@@ -5,11 +5,11 @@ import pandas as pd
 
 def classify_skin_texture(image):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    blurred_image = cv2.GaussianBlur(gray_image, (3, 3), 0)  # Reduced kernel size for more sensitivity
+    blurred_image = cv2.GaussianBlur(gray_image, (3, 3), 0)
     laplacian_var = cv2.Laplacian(blurred_image, cv2.CV_64F).var()
     return laplacian_var
 
-def process_images_in_folder(folder_path):
+def process_images_in_folder(folder_path, threshold=15.0):
     results = []
     for subfolder in os.listdir(folder_path):
         subfolder_path = os.path.join(folder_path, subfolder)
@@ -27,13 +27,14 @@ def process_images_in_folder(folder_path):
                     labels.append(label)
             if labels:
                 average_label = np.mean(labels)
-                results.append((subfolder, average_label, given_label))
+                assigned_label = 1 if average_label > threshold else 0
+                results.append((subfolder, assigned_label, average_label, given_label))
     return results
 
 def main(folder_path):
     results = process_images_in_folder(folder_path)
-    df = pd.DataFrame(results, columns=['Image', 'Skin Texture Classification', 'Given Label'])
+    df = pd.DataFrame(results, columns=['Image', 'Assigned Label', 'Skin Texture Classification', 'Given Label'])
     df.to_csv('skin_texture_results.csv', index=False)
 
 if __name__ == "__main__":
-    main('./cropped_frames')  # Replace with the actual folder path containing subfolders
+    main('./cropped_output_frames')

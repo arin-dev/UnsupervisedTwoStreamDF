@@ -25,28 +25,33 @@ def extract_dnn_features(img_path, model):
 
 def classify_images_with_dnn(base_folder, n_clusters=2):
     model = load_pretrained_model()
-    subfolder_features = []
+    subfolder_labels = []
     subfolder_names = []
 
     for subfolder in os.listdir(base_folder):
         subfolder_path = os.path.join(base_folder, subfolder)
         if os.path.isdir(subfolder_path):
-            folder_features = []
+            image_features = []
             for filename in os.listdir(subfolder_path):
                 if filename.endswith('.jpg') or filename.endswith('.png'):
                     image_path = os.path.join(subfolder_path, filename)
                     features = extract_dnn_features(image_path, model)
-                    folder_features.append(features)
-            if folder_features:
-                aggregated_features = np.mean(folder_features, axis=0)
-                subfolder_features.append(aggregated_features)
+                    image_features.append(features)
+            if len(image_features) >= n_clusters:
+                kmeans = KMeans(n_clusters=n_clusters, init='k-means++', random_state=42)
+                image_labels = kmeans.fit_predict(image_features)
+                label_counts = np.bincount(image_labels)
+                if len(label_counts) == 1 or label_counts[0] != label_counts[1]:
+                    folder_label = np.argmax(label_counts)
+                else:
+                    folder_label = -1
+                subfolder_labels.append(folder_label)
+                subfolder_names.append(subfolder)
+            else:
+                subfolder_labels.append(-1)
                 subfolder_names.append(subfolder)
 
-    if subfolder_features:
-        kmeans = KMeans(n_clusters=n_clusters, init='k-means++', random_state=42)
-        labels = kmeans.fit_predict(subfolder_features)
-        return subfolder_names, labels
-    return [], []
+    return subfolder_names, subfolder_labels
 
 def save_results_to_csv(folder_names, labels, output_file):
     results_df = pd.DataFrame({'Folder': folder_names, 'Cluster_Label': labels})

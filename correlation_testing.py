@@ -55,6 +55,6 @@ def main(directory):
 # Example usage
 # video_frames_directory = "path_to_directory_with_frames"  # Replace with your frames directory
 # video_frames_directory = "./frames_function_cross_test_data"  # Replace with your frames directory
-video_frames_directory = "./cropped_frames"  # Replace with your frames directory
-# video_frames_directory = "./cropped_output_frames"  # Replace with your frames directory
+# video_frames_directory = "./cropped_frames"  # Replace with your frames directory
+video_frames_directory = "./cropped_output_frames"  # Replace with your frames directory
 main(video_frames_directory)
